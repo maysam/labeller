@@ -12,13 +12,8 @@ using System.IO;
 
 namespace PCLabellerProject
 {
-    /*
-    public class KeyValue
-    {
-        public string Key  { get; set; }
-        public string Value { get; set; }
-    }
-     */ 
+
+    
     public partial class Form1 : Form
     {
         public Form1()
@@ -26,27 +21,8 @@ namespace PCLabellerProject
             InitializeComponent();
         }
 
-        string trabajo_folder;
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            RegistryKey UserPrefs = Registry.CurrentUser.OpenSubKey("ITEC", true);
-
-            if (UserPrefs != null)
-            {
-                trabajo_folder = UserPrefs.GetValue("trabajo_folder").ToString();
-//                _Company = UserPrefs.GetValue("Company").ToString();
-  //              _SomeValue = int.Parse(UserPrefs.GetValue("SomeValue").ToString());
-            }
-            else
-            {
-                // Key did not exist so use defaults
-                trabajo_folder = System.Environment.CurrentDirectory;
-    //            _Company = System.Environment.UserDomainName;
-      //          _SomeValue = 0;
-            }
-            /*
-            var key_values = new[] {
+        private string trabajo_folder;
+        public KeyValue[] key_values = new[] {
                 new KeyValue { Key = "V1", Value = "" },
                 new KeyValue { Key = "V2", Value = "" },
                 new KeyValue { Key = "V3", Value = "" },
@@ -54,15 +30,33 @@ namespace PCLabellerProject
                 new KeyValue { Key = "V5", Value = "" },
                 new KeyValue { Key = "V6", Value = "" }
             };
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            
+            RegistryKey UserPrefs = Registry.CurrentUser.OpenSubKey("ITEC", true);
+
+            if (UserPrefs == null)
+            {
+                // Value does not already exist so create it
+                UserPrefs = Registry.CurrentUser.CreateSubKey("ITEC");
+                trabajo_folder = System.Environment.CurrentDirectory;
+
+            }
+            else {
+                trabajo_folder = UserPrefs.GetValue("trabajo_folder").ToString();
+                var counter = 0;
+                foreach (var key_value in key_values)
+                {
+                    counter++;
+                    key_value.Value = UserPrefs.GetValue("v"+counter).ToString();
+                }
+            }
+
             dataGridView1.DataSource = key_values;
-             */
-
-            var list = new List<KeyValuePair<string, int>>();
-            list.Add(new KeyValuePair<string, int>("Cat", 1));
-            list.Add(new KeyValuePair<string, int>("Dog", 2));
-            list.Add(new KeyValuePair<string, int>("Rabbit", 4));
-
+            
+             
             updateFolder(trabajo_folder);
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -98,22 +92,10 @@ namespace PCLabellerProject
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-
-            RegistryKey UserPrefs = Registry.CurrentUser.OpenSubKey("ITEC", true);
-
-            if (UserPrefs == null)
-            {
-                // Value does not already exist so create it
-                UserPrefs = Registry.CurrentUser.CreateSubKey("ITEC");
-            }
-
-            UserPrefs.SetValue("trabajo_folder", trabajo_folder);
-            Application.Exit();
-        }
-
-        private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
-        {
-
+            var question = "¿Seguro que quieres cerrar la aplicación?";
+//            var confirmResult = MessageBox.Show(question, question, MessageBoxButtons.YesNo);
+  //          e.Cancel = confirmResult != DialogResult.Yes;
+            save();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -124,9 +106,40 @@ namespace PCLabellerProject
             
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void button1_Click_1(object sender, EventArgs e)
         {
+            foreach (var file in Directory.GetFiles(trabajo_folder, "*.prn").ToArray())
+            {
+                var output_file = Path.ChangeExtension(file, ".bin");
 
+                var input_text = File.ReadAllText(file);
+                var output_text = input_text;
+                foreach (var key_value in key_values)
+                {
+                    output_text = output_text.Replace("{"+key_value.Key+"}", key_value.Value);
+                }
+                File.WriteAllText(output_file, output_text);
+            }
+            save();
+        }
+
+        private void save()
+        {
+            RegistryKey UserPrefs = Registry.CurrentUser.OpenSubKey("ITEC", true);
+
+            if (UserPrefs == null)
+            {
+                // Value does not already exist so create it
+                UserPrefs = Registry.CurrentUser.CreateSubKey("ITEC");
+            }
+
+            UserPrefs.SetValue("trabajo_folder", trabajo_folder);
+            UserPrefs.SetValue("v1", key_values[0].Value);
+            UserPrefs.SetValue("v2", key_values[1].Value);
+            UserPrefs.SetValue("v3", key_values[2].Value);
+            UserPrefs.SetValue("v4", key_values[3].Value);
+            UserPrefs.SetValue("v5", key_values[4].Value);
+            UserPrefs.SetValue("v6", key_values[5].Value);
         }
     }
 }

@@ -41,10 +41,10 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.Key = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -60,16 +60,11 @@
             // 
             resources.ApplyResources(this.textBox1, "textBox1");
             this.textBox1.Name = "textBox1";
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // label1
             // 
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
-            // 
-            // folderBrowserDialog1
-            // 
-            this.folderBrowserDialog1.HelpRequest += new System.EventHandler(this.folderBrowserDialog1_HelpRequest);
             // 
             // button2
             // 
@@ -114,12 +109,6 @@
             resources.ApplyResources(this.label7, "label7");
             this.label7.Name = "label7";
             // 
-            // propertyGrid1
-            // 
-            resources.ApplyResources(this.propertyGrid1, "propertyGrid1");
-            this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-            // 
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -131,6 +120,7 @@
             // 
             // Key
             // 
+            this.Key.DataPropertyName = "Key";
             this.Key.Frozen = true;
             resources.ApplyResources(this.Key, "Key");
             this.Key.Name = "Key";
@@ -138,15 +128,23 @@
             // 
             // Value
             // 
+            this.Value.DataPropertyName = "Value";
             resources.ApplyResources(this.Value, "Value");
             this.Value.Name = "Value";
+            // 
+            // button1
+            // 
+            resources.ApplyResources(this.button1, "button1");
+            this.button1.Name = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // Form1
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.propertyGrid1);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
@@ -184,10 +182,10 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.PropertyGrid propertyGrid1;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Key;
         private System.Windows.Forms.DataGridViewTextBoxColumn Value;
+        private System.Windows.Forms.Button button1;
     }
 }
 
