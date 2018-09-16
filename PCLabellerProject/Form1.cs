@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Drawing.Printing;
 
 namespace PCLabellerProject
 {
@@ -140,6 +141,21 @@ namespace PCLabellerProject
             UserPrefs.SetValue("v4", key_values[3].Value);
             UserPrefs.SetValue("v5", key_values[4].Value);
             UserPrefs.SetValue("v6", key_values[5].Value);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (listBox1.SelectedIndex > 0)
+            {
+
+                PrintDialog printDialog = new PrintDialog();
+                printDialog.PrinterSettings = new PrinterSettings();
+                
+                if (DialogResult.OK == printDialog.ShowDialog(this))
+                {
+                    RawPrinterHelper.SendStringToPrinter(printDialog.PrinterSettings.PrinterName, trabajo_folder + "\\"+ listBox1.SelectedItem.ToString());
+                }
+            }
         }
     }
 }
