@@ -42,8 +42,6 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.Key = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.button1 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
@@ -53,6 +51,8 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.plcStatus = new System.Windows.Forms.TextBox();
             this.listBox2 = new System.Windows.Forms.ListBox();
+            this.Key = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -87,6 +87,7 @@
             this.listBox1.FormattingEnabled = true;
             resources.ApplyResources(this.listBox1, "listBox1");
             this.listBox1.Name = "listBox1";
+            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
             // label3
             // 
@@ -121,20 +122,6 @@
             this.Value});
             resources.ApplyResources(this.dataGridView1, "dataGridView1");
             this.dataGridView1.Name = "dataGridView1";
-            // 
-            // Key
-            // 
-            this.Key.DataPropertyName = "Key";
-            this.Key.Frozen = true;
-            resources.ApplyResources(this.Key, "Key");
-            this.Key.Name = "Key";
-            this.Key.ReadOnly = true;
-            // 
-            // Value
-            // 
-            this.Value.DataPropertyName = "Value";
-            resources.ApplyResources(this.Value, "Value");
-            this.Value.Name = "Value";
             // 
             // button1
             // 
@@ -187,6 +174,20 @@
             resources.ApplyResources(this.listBox2, "listBox2");
             this.listBox2.Name = "listBox2";
             // 
+            // Key
+            // 
+            this.Key.DataPropertyName = "Key";
+            this.Key.Frozen = true;
+            resources.ApplyResources(this.Key, "Key");
+            this.Key.Name = "Key";
+            this.Key.ReadOnly = true;
+            // 
+            // Value
+            // 
+            this.Value.DataPropertyName = "Value";
+            resources.ApplyResources(this.Value, "Value");
+            this.Value.Name = "Value";
+            // 
             // Form1
             // 
             resources.ApplyResources(this, "$this");
@@ -210,6 +211,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.plcIP);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.TopMost = true;
@@ -236,8 +238,6 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Key;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Value;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Label label8;
@@ -247,6 +247,8 @@
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.TextBox plcStatus;
         private System.Windows.Forms.ListBox listBox2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Key;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Value;
     }
 }
 

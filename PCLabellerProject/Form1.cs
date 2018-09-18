@@ -52,14 +52,7 @@ namespace PCLabellerProject
                     printerName.Text = printer_name.ToString();
                 var plcIP_value = UserPrefs.GetValue("plcIP");
                 if (plcIP_value != null)
-                    plcIP.Text = plcIP_value.ToString();
-                
-                var counter = 0;
-                foreach (var key_value in key_values)
-                {
-                    counter++;
-                    key_value.Value = UserPrefs.GetValue("v"+counter).ToString();
-                }
+                    plcIP.Text = plcIP_value.ToString();               
             }
 
             dataGridView1.DataSource = key_values;
@@ -75,6 +68,7 @@ namespace PCLabellerProject
             listBox1.Items.Clear();
             string[] files = Directory.GetFiles(path, "*.prn").Select(Path.GetFileName).ToArray();
             listBox1.Items.AddRange(files);
+            listBox1.SelectedIndex = 0;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -99,19 +93,39 @@ namespace PCLabellerProject
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            foreach (var file in Directory.GetFiles(trabajo_folder, "*.prn").ToArray())
+            if (listBox1.SelectedIndex > -1)
             {
-                var output_file = Path.ChangeExtension(file, ".bin");
-
-                var input_text = File.ReadAllText(file);
-                var output_text = input_text;
-                foreach (var key_value in key_values)
+                var selected_prn = listBox1.SelectedItem.ToString();
+                foreach (var file in Directory.GetFiles(trabajo_folder, selected_prn).ToArray())
                 {
-                    output_text = output_text.Replace("{"+key_value.Key+"}", key_value.Value);
+                    var output_file = Path.ChangeExtension(file, ".bin");
+
+                    var input_text = File.ReadAllText(file);
+                    var output_text = input_text;
+                    foreach (var key_value in key_values)
+                    {
+                        output_text = output_text.Replace("{" + key_value.Key + "}", key_value.Value);
+                    }
+                    File.WriteAllText(output_file, output_text);
                 }
-                File.WriteAllText(output_file, output_text);
+                save_values(listBox1.SelectedIndex);
             }
-            save();
+        }
+
+        private void save_values(int i)
+        {
+            RegistryKey UserPrefs = Registry.CurrentUser.OpenSubKey("ITEC", true);
+            if (UserPrefs == null)
+            {
+                // Value does not already exist so create it
+                UserPrefs = Registry.CurrentUser.CreateSubKey("ITEC");
+            }
+            UserPrefs.SetValue("v_" + i + "_1", key_values[0].Value);
+            UserPrefs.SetValue("v_" + i + "_2", key_values[1].Value);
+            UserPrefs.SetValue("v_" + i + "_3", key_values[2].Value);
+            UserPrefs.SetValue("v_" + i + "_4", key_values[3].Value);
+            UserPrefs.SetValue("v_" + i + "_5", key_values[4].Value);
+            UserPrefs.SetValue("v_" + i + "_6", key_values[5].Value);
         }
 
         private void save()
@@ -127,12 +141,6 @@ namespace PCLabellerProject
             UserPrefs.SetValue("trabajo_folder", trabajo_folder);
             UserPrefs.SetValue("printer_name", printerName.Text);
             UserPrefs.SetValue("plcIP", plcIP.Text);
-            UserPrefs.SetValue("v1", key_values[0].Value);
-            UserPrefs.SetValue("v2", key_values[1].Value);
-            UserPrefs.SetValue("v3", key_values[2].Value);
-            UserPrefs.SetValue("v4", key_values[3].Value);
-            UserPrefs.SetValue("v5", key_values[4].Value);
-            UserPrefs.SetValue("v6", key_values[5].Value);
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -224,6 +232,34 @@ namespace PCLabellerProject
             {
                 return se.Message;
             }
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            button1.Enabled = listBox1.SelectedIndex > -1;
+
+            RegistryKey UserPrefs = Registry.CurrentUser.OpenSubKey("ITEC", true);
+            if (UserPrefs == null)
+            {
+                // Value does not already exist so create it
+                UserPrefs = Registry.CurrentUser.CreateSubKey("ITEC");
+            }
+            else
+            {
+                var counter = 0;
+                var i = listBox1.SelectedIndex;
+                foreach (var key_value in key_values)
+                {
+                    counter++;
+                    var val = UserPrefs.GetValue("v_" + i + "_" + counter);
+                    if (val == null)
+                    {
+                        val = "";
+                    }
+                    key_value.Value = val.ToString();
+                }
+            }
+            dataGridView1.Refresh();
         }
     }
 }
