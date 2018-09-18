@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Printing;
+using EasyModbus;
+using System.Net.Sockets;
 
 namespace PCLabellerProject
 {
@@ -45,6 +47,13 @@ namespace PCLabellerProject
             }
             else {
                 trabajo_folder = UserPrefs.GetValue("trabajo_folder").ToString();
+                var printer_name = UserPrefs.GetValue("printer_name");
+                if(printer_name != null)
+                    printerName.Text = printer_name.ToString();
+                var plcIP_value = UserPrefs.GetValue("plcIP");
+                if (plcIP_value != null)
+                    plcIP.Text = plcIP_value.ToString();
+                
                 var counter = 0;
                 foreach (var key_value in key_values)
                 {
@@ -54,49 +63,30 @@ namespace PCLabellerProject
             }
 
             dataGridView1.DataSource = key_values;
-            
-             
             updateFolder(trabajo_folder);
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            String cmd = "";
-            cmd = cmd + "5000";  // sub HEAD (NOT)
-            cmd = cmd + "00";  //   network number (NOT)
-            cmd = cmd + "FF";  //PLC NUMBER
-            cmd = cmd + "03FF"; // DEMAND OBJECT MUDULE I/O NUMBER
-            cmd = cmd + "00";  //  DEMAND OBJECT MUDULE DEVICE NUMBER
-            cmd = cmd + "001C";//  Length of demand data
-            cmd = cmd + "000A"; //  CPU inspector data
-            cmd = cmd + "0401"; //  Read command (to read the data from PLC we should "0401"
-            cmd = cmd + "0000";//  Sub command
-            cmd = cmd + "D*";//   device code
-            cmd = cmd + "009500"; //adBase 
-            cmd = cmd + "0001";
-            //Device No ,It’s a Address every PLC device will have an address
-            //we need to send the appropriate address to read the data.
-
+            modbusClient = new ModbusClient();
+            timer1.Enabled = true;
         }
 
         private void updateFolder(string path)
         {
             trabajo_folder = path;
-            label2.Text = trabajo_folder;
+            folderName.Text = trabajo_folder;
             listBox1.Items.Clear();
             string[] files = Directory.GetFiles(path, "*.prn").Select(Path.GetFileName).ToArray();
             listBox1.Items.AddRange(files);
-            //DirectoryInfo di = new DirectoryInfo(path);
-            //Files files = di.getFiles("*.prn");
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             var question = "¿Seguro que quieres cerrar la aplicación?";
-//            var confirmResult = MessageBox.Show(question, question, MessageBoxButtons.YesNo);
-  //          e.Cancel = confirmResult != DialogResult.Yes;
+            var confirmResult = MessageBox.Show(question, question, MessageBoxButtons.YesNo);
+            e.Cancel = confirmResult != DialogResult.Yes;
             save();
+            if (!e.Cancel && modbusClient.Connected)
+            {
+                modbusClient.Disconnect();                                                //Disconnect from Server
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -135,6 +125,8 @@ namespace PCLabellerProject
             }
 
             UserPrefs.SetValue("trabajo_folder", trabajo_folder);
+            UserPrefs.SetValue("printer_name", printerName.Text);
+            UserPrefs.SetValue("plcIP", plcIP.Text);
             UserPrefs.SetValue("v1", key_values[0].Value);
             UserPrefs.SetValue("v2", key_values[1].Value);
             UserPrefs.SetValue("v3", key_values[2].Value);
@@ -145,16 +137,92 @@ namespace PCLabellerProject
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (listBox1.SelectedIndex > 0)
+            if (listBox1.SelectedIndex > -1)
             {
+                var selected_prn = listBox1.SelectedItem.ToString();
+                var selected_bin = Path.ChangeExtension(selected_prn, "bin");
+                listBox2.Items.Add("printing " + selected_bin);
+                var text_to_print = File.ReadAllText(trabajo_folder + "\\" + selected_bin);
+                RawPrinterHelper.SendStringToPrinter(printerName.Text, text_to_print);
+            }
+        }
 
-                PrintDialog printDialog = new PrintDialog();
-                printDialog.PrinterSettings = new PrinterSettings();
+        private void button4_Click(object sender, EventArgs e)
+        {
+            PrintDialog printDialog = new PrintDialog();
+            printDialog.PrinterSettings = new PrinterSettings();
+
+            if (DialogResult.OK == printDialog.ShowDialog(this))
+            {
+                printerName.Text = printDialog.PrinterSettings.PrinterName;
                 
-                if (DialogResult.OK == printDialog.ShowDialog(this))
+            }
+        }
+
+        ModbusClient modbusClient;
+        private void timer1_Tick(object sender, EventArgs e)
+        {                                                   //Connect to Server
+            if (modbusClient.Connected)
+            {
+                int[] readHoldingRegisters = modbusClient.ReadHoldingRegisters(0, 10);    //Read 10 Holding Registers from Server, starting with Address 1
+                var new_text = String.Join(" - ", readHoldingRegisters);
+                if (label7.Text != new_text)
                 {
-                    RawPrinterHelper.SendStringToPrinter(printDialog.PrinterSettings.PrinterName, trabajo_folder + "\\"+ listBox1.SelectedItem.ToString());
+                    label7.Text = new_text;
+                    var to_print= readHoldingRegisters[0];
+                    if (to_print == 1)
+                    {
+                        var number = readHoldingRegisters[1].ToString();
+                        listBox1.SelectedIndex = -1;
+                        for (int i = 0; i < listBox1.Items.Count; i++)
+                        {
+                            if (listBox1.Items[i].ToString().StartsWith(number))
+                            {
+                                listBox1.SelectedIndex = i;
+
+                                var selected_prn = listBox1.Items[i].ToString();
+                                var selected_bin = Path.ChangeExtension(selected_prn, "bin");
+                                listBox2.Items.Add("printing " + selected_bin);
+                                var text_to_print = File.ReadAllText(trabajo_folder + "\\" + selected_bin);
+                                RawPrinterHelper.SendStringToPrinter(printerName.Text, text_to_print);
+                            }
+                        }
+                    }
+                    listBox2.Items.Add(new_text);
                 }
+            }
+            else
+            {
+                connect_to_plc();
+            }
+        }
+
+        private void plcIP_TextChanged(object sender, EventArgs e)
+        {
+            if (modbusClient.Connected)
+                modbusClient.Disconnect();
+//            connect_to_plc();
+        }
+
+        private async  void connect_to_plc()
+        {
+            if (modbusClient.Connected)
+                modbusClient.Disconnect();
+            var status = "none";
+            status =  await Task.Run<string>(() => status = modbusClient_Connect());
+            plcStatus.Text = status;
+        }
+
+        string modbusClient_Connect()
+        {
+            try
+            {
+                modbusClient.Connect(plcIP.Text, 502);
+                return modbusClient.Connected ? "Conectado" : "Desconectado";
+            }
+            catch (SocketException se)
+            {
+                return se.Message;
             }
         }
     }

@@ -43,7 +43,7 @@ namespace PCLabellerProject
 
         public static bool WritePrinter(IntPtr hPrinter, IntPtr pBytes, Int32 dwCount, out Int32 dwWritten)
         {
-            return WritePrinter(hPrinter, pBytes, dwCount, out dwWritten);
+            return NativeMethods.WritePrinter(hPrinter, pBytes, dwCount, out dwWritten);
         }
 
         // SendBytesToPrinter()
@@ -114,7 +114,7 @@ namespace PCLabellerProject
             return bSuccess;
         }
 
-        public static bool SendStringToPrinter(string szPrinterName, string szString)
+        public static async void SendStringToPrinter(string szPrinterName, string szString)
         {
             IntPtr pBytes;
             Int32 dwCount;
@@ -124,9 +124,9 @@ namespace PCLabellerProject
             // the string to ANSI text.
             pBytes = Marshal.StringToCoTaskMemAnsi(szString);
             // Send the converted ANSI string to the printer.
-            SendBytesToPrinter(szPrinterName, pBytes, dwCount);
+            await Task.Run(() => SendBytesToPrinter(szPrinterName, pBytes, dwCount));
             Marshal.FreeCoTaskMem(pBytes);
-            return true;
+            //return true;
         }
     }
 
