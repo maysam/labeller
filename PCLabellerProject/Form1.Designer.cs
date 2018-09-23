@@ -37,11 +37,11 @@
             this.button2 = new System.Windows.Forms.Button();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.Key = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.button1 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
@@ -49,12 +49,13 @@
             this.button4 = new System.Windows.Forms.Button();
             this.folderName = new System.Windows.Forms.TextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.plcStatus = new System.Windows.Forms.TextBox();
             this.listBox2 = new System.Windows.Forms.ListBox();
-            this.Key = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.statusBar = new System.Windows.Forms.StatusStrip();
+            this.button5 = new System.Windows.Forms.Button();
+            this.plcStatus = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.statusBar.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -94,16 +95,6 @@
             resources.ApplyResources(this.label3, "label3");
             this.label3.Name = "label3";
             // 
-            // label4
-            // 
-            resources.ApplyResources(this.label4, "label4");
-            this.label4.Name = "label4";
-            // 
-            // label5
-            // 
-            resources.ApplyResources(this.label5, "label5");
-            this.label5.Name = "label5";
-            // 
             // label6
             // 
             resources.ApplyResources(this.label6, "label6");
@@ -122,6 +113,21 @@
             this.Value});
             resources.ApplyResources(this.dataGridView1, "dataGridView1");
             this.dataGridView1.Name = "dataGridView1";
+            // 
+            // Key
+            // 
+            this.Key.DataPropertyName = "Key";
+            this.Key.Frozen = true;
+            resources.ApplyResources(this.Key, "Key");
+            this.Key.Name = "Key";
+            this.Key.ReadOnly = true;
+            // 
+            // Value
+            // 
+            this.Value.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Value.DataPropertyName = "Value";
+            resources.ApplyResources(this.Value, "Value");
+            this.Value.Name = "Value";
             // 
             // button1
             // 
@@ -163,37 +169,38 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // plcStatus
-            // 
-            resources.ApplyResources(this.plcStatus, "plcStatus");
-            this.plcStatus.Name = "plcStatus";
-            // 
             // listBox2
             // 
             this.listBox2.FormattingEnabled = true;
             resources.ApplyResources(this.listBox2, "listBox2");
             this.listBox2.Name = "listBox2";
             // 
-            // Key
+            // statusBar
             // 
-            this.Key.DataPropertyName = "Key";
-            this.Key.Frozen = true;
-            resources.ApplyResources(this.Key, "Key");
-            this.Key.Name = "Key";
-            this.Key.ReadOnly = true;
+            this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.plcStatus});
+            resources.ApplyResources(this.statusBar, "statusBar");
+            this.statusBar.Name = "statusBar";
             // 
-            // Value
+            // button5
             // 
-            this.Value.DataPropertyName = "Value";
-            resources.ApplyResources(this.Value, "Value");
-            this.Value.Name = "Value";
+            resources.ApplyResources(this.button5, "button5");
+            this.button5.Name = "button5";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // plcStatus
+            // 
+            this.plcStatus.Name = "plcStatus";
+            resources.ApplyResources(this.plcStatus, "plcStatus");
             // 
             // Form1
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.button5);
+            this.Controls.Add(this.statusBar);
             this.Controls.Add(this.listBox2);
-            this.Controls.Add(this.plcStatus);
             this.Controls.Add(this.folderName);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.printerName);
@@ -203,8 +210,6 @@
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.button2);
@@ -219,6 +224,8 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.statusBar.ResumeLayout(false);
+            this.statusBar.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -233,8 +240,6 @@
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.DataGridView dataGridView1;
@@ -245,10 +250,12 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TextBox folderName;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.TextBox plcStatus;
         private System.Windows.Forms.ListBox listBox2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Key;
         private System.Windows.Forms.DataGridViewTextBoxColumn Value;
+        private System.Windows.Forms.StatusStrip statusBar;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.ToolStripStatusLabel plcStatus;
     }
 }
 

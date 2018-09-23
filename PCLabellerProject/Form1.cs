@@ -26,12 +26,15 @@ namespace PCLabellerProject
 
         private string trabajo_folder;
         public KeyValue[] key_values = new[] {
-                new KeyValue { Key = "V1", Value = "" },
-                new KeyValue { Key = "V2", Value = "" },
+                new KeyValue { Key = "Calibre V1", Value = "" },
+                new KeyValue { Key = "Partida/Fecha V2", Value = "" },
                 new KeyValue { Key = "V3", Value = "" },
                 new KeyValue { Key = "V4", Value = "" },
                 new KeyValue { Key = "V5", Value = "" },
-                new KeyValue { Key = "V6", Value = "" }
+                new KeyValue { Key = "V6", Value = "" },
+                new KeyValue { Key = "V7", Value = "" },
+                new KeyValue { Key = "V8", Value = "" },
+                new KeyValue { Key = "V9", Value = "" }
             };
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -102,9 +105,12 @@ namespace PCLabellerProject
 
                     var input_text = File.ReadAllText(file);
                     var output_text = input_text;
+                    var i = 0;
                     foreach (var key_value in key_values)
                     {
-                        output_text = output_text.Replace("{" + key_value.Key + "}", key_value.Value);
+                        i++;
+                        var key = "V" + i;
+                        output_text = output_text.Replace("{" + key + "}", key_value.Value);
                     }
                     File.WriteAllText(output_file, output_text);
                 }
@@ -143,6 +149,8 @@ namespace PCLabellerProject
             UserPrefs.SetValue("plcIP", plcIP.Text);
         }
 
+        int print_count = 0;
+
         private void button3_Click(object sender, EventArgs e)
         {
             if (listBox1.SelectedIndex > -1)
@@ -152,6 +160,8 @@ namespace PCLabellerProject
                 listBox2.Items.Add("printing " + selected_bin);
                 var text_to_print = File.ReadAllText(trabajo_folder + "\\" + selected_bin);
                 RawPrinterHelper.SendStringToPrinter(printerName.Text, text_to_print);
+                print_count++;
+                label7.Text = print_count.ToString();
             }
         }
 
@@ -168,39 +178,51 @@ namespace PCLabellerProject
         }
 
         ModbusClient modbusClient;
+        string old_registers = "";
         private void timer1_Tick(object sender, EventArgs e)
         {                                                   //Connect to Server
-            if (modbusClient.Connected)
+            if (modbusClient.Connected && modbusClient.Available(1))
             {
-                int[] readHoldingRegisters = modbusClient.ReadHoldingRegisters(0, 10);    //Read 10 Holding Registers from Server, starting with Address 1
-                var new_text = String.Join(" - ", readHoldingRegisters);
-                if (label7.Text != new_text)
+                try
                 {
-                    label7.Text = new_text;
-                    var to_print= readHoldingRegisters[0];
-                    if (to_print == 1)
+                    int[] readHoldingRegisters = modbusClient.ReadHoldingRegisters(0, 10);    //Read 10 Holding Registers from Server, starting with Address 1
+                    var new_text = String.Join(" - ", readHoldingRegisters);
+                    if (old_registers != new_text)
                     {
-                        var number = readHoldingRegisters[1].ToString();
-                        listBox1.SelectedIndex = -1;
-                        for (int i = 0; i < listBox1.Items.Count; i++)
+                        old_registers = new_text;
+                        var to_print = readHoldingRegisters[0];
+                        if (to_print == 1)
                         {
-                            if (listBox1.Items[i].ToString().StartsWith(number))
+                            var number = readHoldingRegisters[1].ToString();
+                            listBox1.SelectedIndex = -1;
+                            for (int i = 0; i < listBox1.Items.Count; i++)
                             {
-                                listBox1.SelectedIndex = i;
+                                if (listBox1.Items[i].ToString().StartsWith(number))
+                                {
+                                    listBox1.SelectedIndex = i;
 
-                                var selected_prn = listBox1.Items[i].ToString();
-                                var selected_bin = Path.ChangeExtension(selected_prn, "bin");
-                                listBox2.Items.Add("printing " + selected_bin);
-                                var text_to_print = File.ReadAllText(trabajo_folder + "\\" + selected_bin);
-                                RawPrinterHelper.SendStringToPrinter(printerName.Text, text_to_print);
+                                    var selected_prn = listBox1.Items[i].ToString();
+                                    var selected_bin = Path.ChangeExtension(selected_prn, "bin");
+                                    listBox2.Items.Add("printing " + selected_bin);
+                                    var text_to_print = File.ReadAllText(trabajo_folder + "\\" + selected_bin);
+                                    RawPrinterHelper.SendStringToPrinter(printerName.Text, text_to_print);
+                                    print_count++;
+                                    label7.Text = print_count.ToString();
+                                }
                             }
                         }
+                        listBox2.Items.Add(new_text);
                     }
-                    listBox2.Items.Add(new_text);
+                }
+                catch (Exception ex)
+                {
+                    plcStatus.Text = ex.Message;
+                    modbusClient.Disconnect();
                 }
             }
             else
             {
+                modbusClient.Disconnect();
                 connect_to_plc();
             }
         }
@@ -214,6 +236,7 @@ namespace PCLabellerProject
 
         private async  void connect_to_plc()
         {
+            plcStatus.Text = "connecting to plc";
             if (modbusClient.Connected)
                 modbusClient.Disconnect();
             var status = "none";
@@ -225,10 +248,11 @@ namespace PCLabellerProject
         {
             try
             {
+                modbusClient.Disconnect();
                 modbusClient.Connect(plcIP.Text, 502);
                 return modbusClient.Connected ? "Conectado" : "Desconectado";
             }
-            catch (SocketException se)
+            catch (Exception se)
             {
                 return se.Message;
             }
@@ -260,6 +284,11 @@ namespace PCLabellerProject
                 }
             }
             dataGridView1.Refresh();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            connect_to_plc();
         }
     }
 }
