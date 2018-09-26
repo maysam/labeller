@@ -38,7 +38,8 @@ namespace PCLabellerProject
             };
         private void Form1_Load(object sender, EventArgs e)
         {
-            
+
+            modbusClient = new ModbusClient();
             RegistryKey UserPrefs = Registry.CurrentUser.OpenSubKey("ITEC", true);
 
             if (UserPrefs == null)
@@ -60,7 +61,6 @@ namespace PCLabellerProject
 
             dataGridView1.DataSource = key_values;
             updateFolder(trabajo_folder);
-            modbusClient = new ModbusClient();
             timer1.Enabled = true;
         }
 
@@ -231,7 +231,7 @@ namespace PCLabellerProject
         {
             if (modbusClient.Connected)
                 modbusClient.Disconnect();
-//            connect_to_plc();
+            connect_to_plc();
         }
 
         private async  void connect_to_plc()
